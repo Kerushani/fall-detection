@@ -2,7 +2,7 @@ from twilio.rest import Client
 
 EMERGENCY_CONTACT = {
     "name": "Aman Serhan",
-    "number": "+16477635666"
+    "number": ""
 }
 
 NECKLACE_WEARER = "Kerushani"
