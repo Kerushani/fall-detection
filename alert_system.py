@@ -1,11 +1,11 @@
 from twilio.rest import Client
 
 EMERGENCY_CONTACT = {
-    "name": "Aman Serhan",
+    "name": "Baba",
     "number": ""
 }
 
-NECKLACE_WEARER = "Kerushani"
+NECKLACE_WEARER = "Blue Bitch"
 
 # ask Kerushani for Twilio credentials
 TWILIO_ACCOUNT_SID = ""

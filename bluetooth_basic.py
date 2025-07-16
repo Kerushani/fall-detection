@@ -16,38 +16,86 @@ buffer = ""
 callback = None  # Optional callback to send processed rows
 
 
-def handle_notification(sender, data):
-    # print(data.decode("utf-8"))
-    # print("\n break teehe")
+# def handle_notification(sender, data):
+#     # print(data.decode("utf-8"))
+#     # print("\n break teehe")
 
+#     global df, buffer
+
+#     try:
+#         decoded = data.decode("utf-8").strip()
+#         buffer += decoded  # Keep adding to the buffer
+#         print(f"Buffer: {buffer}")
+
+#         # Check if we have all six values
+#         matches = re.findall(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer)
+
+#         found_keys = {k for _, k in matches}
+#         required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg","bs"}
+
+#         if required_keys.issubset(found_keys):
+#             # Create dict from matches (will take the latest value for each key)
+#             data_dict = {k: float(v) for v, k in matches if k in required_keys}
+
+#             # Append to DataFrame
+#             df.loc[len(df)] = {col: data_dict.get(col) for col in df.columns}
+#             print(df.tail())
+
+#             # Reset buffer to everything **after** the last match
+#             # Find position of last axis match
+#             last_match = list(re.finditer(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer))[-1]
+#             buffer = buffer[last_match.end():]  # keep what's leftover
+#             print(df.head())
+
+#     except Exception as e:
+#         print(f"Error: {e}")
+
+
+## <3 <3
+
+
+
+def handle_notification(sender, data):
     global df, buffer
 
     try:
         decoded = data.decode("utf-8").strip()
-        buffer += decoded  # Keep adding to the buffer
-        print(f"Buffer: {buffer}")
+        buffer += decoded
+        #print(f"Buffer: {buffer}")
 
-        # Check if we have all six values
-        matches = re.findall(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer)
+        # Keep looking for complete frames that start with '#'
+        while "#" in buffer:
+            start = buffer.find("#")
+            next_start = buffer.find("#", start + 1)
 
-        found_keys = {k for _, k in matches}
-        required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg","bs"}
+            if next_start != -1:
+                frame = buffer[start + 1:next_start]
+                buffer = buffer[next_start:]  # trim fully
+            else:
+                # Maybe a complete final frame with no trailing #
+                frame = buffer[start + 1:]
 
-        if required_keys.issubset(found_keys):
-            # Create dict from matches (will take the latest value for each key)
-            data_dict = {k: float(v) for v, k in matches if k in required_keys}
+                # Attempt to parse, but don't trim unless it's good
+                matches = re.findall(r"([xyz][ag]|bs)(-?\d*\.?\d+)", frame)
+                keys = {k for k, _ in matches}
+                if {"xa", "ya", "za", "xg", "yg", "zg", "bs"}.issubset(keys):
+                    data_dict = {k: float(v) for k, v in matches}
+                    df.loc[len(df)] = {col: data_dict.get(col) for col in df.columns}
+                    print(df.tail())
+                    buffer = ""  # Clear after full parse
+                break  # Wait for more data
 
-            # Append to DataFrame
-            df.loc[len(df)] = {col: data_dict.get(col) for col in df.columns}
-            print(df.tail())
-
-            # Reset buffer to everything **after** the last match
-            # Find position of last axis match
-            last_match = list(re.finditer(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer))[-1]
-            buffer = buffer[last_match.end():]  # keep what's leftover
+            # Parse normal frame if we had two #s
+            matches = re.findall(r"([xyz][ag]|bs)(-?\d*\.?\d+)", frame)
+            keys = {k for k, _ in matches}
+            if {"xa", "ya", "za", "xg", "yg", "zg", "bs"}.issubset(keys):
+                data_dict = {k: float(v) for k, v in matches}
+                df.loc[len(df)] = {col: data_dict.get(col) for col in df.columns}
+                print(df.tail())
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 async def main_ble():
     print("Scanning for sense_feather...")
@@ -78,3 +126,5 @@ async def main_ble():
             print ("Stopped")
 
 asyncio.run(main_ble())
+
+

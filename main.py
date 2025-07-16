@@ -38,7 +38,14 @@ X = data[["xa", "ya", "za" ,"xg", "yg", "zg"]]
 y = data['is_fall']
 
 #Create and train the classifier
-clf = RandomForestClassifier(random_state=42)
+clf = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=10,
+    min_samples_split=5,
+    class_weight='balanced',
+    random_state=42
+)
+
 clf.fit(X, y)
 
 #Save the trained model to a file
