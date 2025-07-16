@@ -21,7 +21,7 @@ RX_UUID = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 TX_UUID = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 # TX_UUID = "E439"
 
-df = pd.DataFrame(columns=["xa", "ya", "za", "xg", "yg", "zg"])
+df = pd.DataFrame(columns=["xa", "ya", "za", "xg", "yg", "zg","bs"])
 buffer = ""
 callback = None  # Optional callback to send processed rows
 
@@ -41,7 +41,7 @@ def handle_notification(sender, data):
         matches = re.findall(r"(-?\d*\.?\d+)([xyz][ag])", buffer)
 
         found_keys = {k for _, k in matches}
-        required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg"}
+        required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg","bs"}
 
         if required_keys.issubset(found_keys):
             # Create dict from matches (will take the latest value for each key)
@@ -49,16 +49,16 @@ def handle_notification(sender, data):
 
             # Append to DataFrame
             row_dict = {col: data_dict.get(col) for col in df.columns}
-            row_values = [row_dict[key] for key in ["xa", "ya", "za", "xg", "yg", "zg"]]
-            input_df = pd.DataFrame([row_values], columns=["xa", "ya", "za", "xg", "yg", "zg"])
-
+            row_values = [row_dict[key] for key in ["xa", "ya", "za", "xg", "yg", "zg", "bs"]]
+            input_df = pd.DataFrame([row_values], columns=["xa", "ya", "za", "xg", "yg", "zg","bs"])
+            button = input_df.iloc[:, -1]
             # Reset buffer to everything **after** the last match
             # Find position of last axis match
-            last_match = list(re.finditer(r"(-?\d*\.?\d+)([xyz][ag])", buffer))[-1]
+            last_match = list(re.finditer(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer))[-1]
             buffer = buffer[last_match.end():]  # keep what's leftover
-            prediction = clf.predict(input_df)[0]
+            prediction = clf.predict(input_df.iloc[:, :-1])[0]
             print(f"Prediction: {prediction} ({'FALL' if prediction == 1 else 'NO FALL'})")
-            if prediction == 1:
+            if (prediction == 1) or (button == 1):
                 send_fall_alert()
 
             

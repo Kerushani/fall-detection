@@ -28,7 +28,7 @@ def handle_notification(sender, data):
         print(f"Buffer: {buffer}")
 
         # Check if we have all six values
-        matches = re.findall(r"(-?\d*\.?\d+)([xyz][ag])", buffer)
+        matches = re.findall(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer)
 
         found_keys = {k for _, k in matches}
         required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg","bs"}
@@ -43,7 +43,7 @@ def handle_notification(sender, data):
 
             # Reset buffer to everything **after** the last match
             # Find position of last axis match
-            last_match = list(re.finditer(r"(-?\d*\.?\d+)([xyz][ag])", buffer))[-1]
+            last_match = list(re.finditer(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer))[-1]
             buffer = buffer[last_match.end():]  # keep what's leftover
 
     except Exception as e:
