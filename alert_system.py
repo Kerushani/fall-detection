@@ -30,4 +30,4 @@ def send_fall_alert():
     except Exception as e:
         print(f"Failed to send alert: {e}")
         return None
-
+    

@@ -1,7 +1,17 @@
+import numpy as np
+import matplotlib as plt
+from sklearn.ensemble import RandomForestClassifier
+import joblib
 import asyncio
 from bleak import BleakScanner, BleakClient
 import pandas as pd
 import re
+from alert_system import send_fall_alert
+
+
+# Load the trained model
+clf = joblib.load('fall_detection_model.pkl')
+
 
 
 # UUID for the TX characteristic on Adafruit BLE UART service
@@ -25,7 +35,7 @@ def handle_notification(sender, data):
     try:
         decoded = data.decode("utf-8").strip()
         buffer += decoded  # Keep adding to the buffer
-        print(f"Buffer: {buffer}")
+        # print(f"Buffer: {buffer}")
 
         # Check if we have all six values
         matches = re.findall(r"(-?\d*\.?\d+)([xyz][ag])", buffer)
@@ -38,14 +48,20 @@ def handle_notification(sender, data):
             data_dict = {k: float(v) for v, k in matches if k in required_keys}
 
             # Append to DataFrame
-            df.loc[len(df)] = {col: data_dict.get(col) for col in df.columns}
-            print(df.tail())
+            row_dict = {col: data_dict.get(col) for col in df.columns}
+            row_values = [row_dict[key] for key in ["xa", "ya", "za", "xg", "yg", "zg"]]
+            input_df = pd.DataFrame([row_values], columns=["xa", "ya", "za", "xg", "yg", "zg"])
 
             # Reset buffer to everything **after** the last match
             # Find position of last axis match
             last_match = list(re.finditer(r"(-?\d*\.?\d+)([xyz][ag])", buffer))[-1]
             buffer = buffer[last_match.end():]  # keep what's leftover
+            prediction = clf.predict(input_df)[0]
+            print(f"Prediction: {prediction} ({'FALL' if prediction == 1 else 'NO FALL'})")
+            if prediction == 1:
+                send_fall_alert()
 
+            
     except Exception as e:
         print(f"Error: {e}")
 
