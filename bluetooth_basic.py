@@ -11,7 +11,7 @@ RX_UUID = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 TX_UUID = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 # TX_UUID = "E439"
 
-df = pd.DataFrame(columns=["xa", "ya", "za", "xg", "yg", "zg"])
+df = pd.DataFrame(columns=["xa", "ya", "za", "xg", "yg", "zg","bs"])
 buffer = ""
 callback = None  # Optional callback to send processed rows
 
@@ -31,7 +31,7 @@ def handle_notification(sender, data):
         matches = re.findall(r"(-?\d*\.?\d+)([xyz][ag])", buffer)
 
         found_keys = {k for _, k in matches}
-        required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg"}
+        required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg","bs"}
 
         if required_keys.issubset(found_keys):
             # Create dict from matches (will take the latest value for each key)
