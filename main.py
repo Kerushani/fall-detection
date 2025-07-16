@@ -7,7 +7,7 @@ import joblib
 
 
 #dataset link: https://www.kaggle.com/datasets/antonygarciag/walker-fall-detection?resource=download
-data = pd.read_csv(r'/Users/kerushanisivaneswaran/Documents/GitHub/fall-detection/fall_data.csv')
+data = pd.read_csv(r'fall_data.csv')
 
 
 # Assuming df is your DataFrame
@@ -34,7 +34,7 @@ data.rename(columns=dict(zip(['label', 'acc_x_avg', 'acc_y_avg', 'acc_z_avg', 'g
 data['is_fall'] = (data['label'] == 'fall').astype(int)
 
 #Features and target
-X = data[["xa", "ya", "za" ,"xg", "yg", "zg"]]
+X = data[["xa", "ya", "za" ,"xg"]] ## REMOVED zg AND yg
 y = data['is_fall']
 
 #Create and train the classifier
@@ -50,3 +50,27 @@ clf.fit(X, y)
 
 #Save the trained model to a file
 joblib.dump(clf, 'fall_detection_model.pkl')
+
+import matplotlib.pyplot as plt
+
+# Get feature importances
+feature_names = X.columns
+importances = clf.feature_importances_
+
+# Create a DataFrame for better visualization
+importance_df = pd.DataFrame({
+    'Feature': feature_names,
+    'Importance': importances
+}).sort_values(by='Importance', ascending=False)
+
+# Print the table
+print(importance_df)
+
+# Plot feature importances
+plt.figure(figsize=(8, 6))
+plt.barh(importance_df['Feature'], importance_df['Importance'], color='skyblue')
+plt.xlabel("Feature Importance")
+plt.title("Feature Importance in Fall Detection Model")
+plt.gca().invert_yaxis()  # Highest importance at top
+plt.tight_layout()
+plt.show()

@@ -109,7 +109,7 @@ async def handle_notification(sender, data):
             row_values = [row_dict[key] for key in ["xa", "ya", "za", "xg", "yg", "zg", "bs"]]
             input_df = pd.DataFrame([row_values], columns=["xa", "ya", "za", "xg", "yg", "zg","bs"])
             button = bool(input_df.loc[0, "bs"])
-            features = ["xa", "ya", "za", "xg", "yg", "zg"]
+            features = ["xa", "ya", "za", "xg"] ## REMOVED zg AND yg
             prediction = clf.predict(input_df[features])[0]
             # print(f"Prediction: {prediction} ({'FALL' if prediction == 1 else 'NO FALL'})")
             if (prediction == 1):
