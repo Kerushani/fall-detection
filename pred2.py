@@ -118,7 +118,8 @@ async def handle_notification(sender, data):
                 await asyncio.sleep(10)
                 
             if (button == 1):
-                print('Blue Bitch hit dat button')
+                
+                print('[NECKLACE WEARER] PANIC BUTTON')
                 send_fall_alert()
                 await asyncio.sleep(10)
 

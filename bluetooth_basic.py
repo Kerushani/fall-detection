@@ -107,6 +107,8 @@ async def main_ble():
             print("found sense!")
             break
     
+    # E7809AF3-14A0-57F0-0247-7950573B6483
+    # BD969BC8-EA76-4891-83A2-7C4D5813B5F8 - second feather
     async with BleakClient(feather.address) as client:
         print(f"Connected to {feather.name}")
         
