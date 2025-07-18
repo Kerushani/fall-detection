@@ -13,6 +13,21 @@ import time
 # Load the trained model
 clf = joblib.load('fall_detection_model.pkl')
 
+fall_cooldown = False
+button_cooldown = False
+
+async def start_fall_cooldown():
+    global fall_cooldown
+    fall_cooldown = True
+    await asyncio.sleep(10)
+    fall_cooldown = False
+
+async def start_button_cooldown():
+    global button_cooldown
+    button_cooldown = True
+    await asyncio.sleep(10)
+    button_cooldown = False
+
 
 
 # UUID for the TX characteristic on Adafruit BLE UART service
@@ -26,45 +41,6 @@ df = pd.DataFrame(columns=["xa", "ya", "za", "xg", "yg", "zg","bs"])
 buffer = ""
 callback = None  # Optional callback to send processed rows
 
-## OLD
-# def handle_notification(sender, data):
-#     # print(data.decode("utf-8"))
-#     # print("\n break teehe")
-
-#     global df, buffer
-
-#     try:
-#         decoded = data.decode("utf-8").strip()
-#         buffer += decoded  # Keep adding to the buffer
-#         # print(f"Buffer: {buffer}")
-
-#         # Check if we have all six values
-#         matches = re.findall(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer)
-
-#         found_keys = {k for _, k in matches}
-#         required_keys = {"xa", "ya", "za" ,"xg", "yg", "zg","bs"}
-
-#         if required_keys.issubset(found_keys):
-#             # Create dict from matches (will take the latest value for each key)
-#             data_dict = {k: float(v) for v, k in matches if k in required_keys}
-
-#             # Append to DataFrame
-#             row_dict = {col: data_dict.get(col) for col in df.columns}
-#             row_values = [row_dict[key] for key in ["xa", "ya", "za", "xg", "yg", "zg", "bs"]]
-#             input_df = pd.DataFrame([row_values], columns=["xa", "ya", "za", "xg", "yg", "zg","bs"])
-#             button = input_df.iloc[:, -1]
-#             # Reset buffer to everything **after** the last match
-#             # Find position of last axis match
-#             last_match = list(re.finditer(r"(-?\d*\.?\d+)(?:([xyz][ag])|(bs))", buffer))[-1]
-#             buffer = buffer[last_match.end():]  # keep what's leftover
-#             prediction = clf.predict(input_df.iloc[:, :-1])[0]
-#             print(f"Prediction: {prediction} ({'FALL' if prediction == 1 else 'NO FALL'})")
-#             if (prediction == 1) or (button == 1):
-#                 send_fall_alert()
-
-            
-#     except Exception as e:
-#         print(f"Error: {e}")
 
 
 ## NEW
@@ -112,15 +88,15 @@ async def handle_notification(sender, data):
             features = ["xa", "ya", "za", "xg"] ## REMOVED zg AND yg
             prediction = clf.predict(input_df[features])[0]
             # print(f"Prediction: {prediction} ({'FALL' if prediction == 1 else 'NO FALL'})")
-            if (prediction == 1):
+            if not fall_cooldown and prediction == 1:
                 print('oopsie fall detected')
-                send_fall_alert()
-                await asyncio.sleep(10)
+                # send_fall_alert()
+                asyncio.create_task(start_fall_cooldown())
                 
-            if (button == 1):
+            if not button_cooldown and button == 1:
                 print('Blue Bitch hit dat button')
-                send_fall_alert()
-                await asyncio.sleep(10)
+                # send_fall_alert()
+                asyncio.create_task(start_button_cooldown())
 
     except Exception as e:
         print(f"Error: {e}")
