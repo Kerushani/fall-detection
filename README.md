@@ -2,6 +2,9 @@ Fall Detection
 
 This project contains code for a necklace that detects when a user has fallen.
 
+<img width="2166" height="1140" alt="image" src="https://github.com/user-attachments/assets/688348da-9f48-405f-a326-566aed1fd0ef" />
+
+
 <img width="190" height="398" alt="Screenshot 2025-10-04 at 10 27 15 PM" src="https://github.com/user-attachments/assets/18ff94a7-a94b-41be-8e79-65c76fc18979" />
 
 
