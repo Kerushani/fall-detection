@@ -2,7 +2,7 @@ Fall Detection
 
 This project contains code for a wearable necklace that detects when a user has fallen.
 
-It uses a gyroscope and accelerometer connected to a Bluetooth-enabled Adafruit Feather to monitor the user’s orientation and motion. Based on this sensor data, a prediction is made using a Random Forest model to determine whether a fall has occurred.
+It uses a gyroscope and accelerometer connected to a Bluetooth Adafruit Feather to monitor the user’s orientation and motion. Based on this sensor data, a prediction is made using a Random Forest model to determine whether a fall has occurred.
 
 If a fall is detected, a text message is sent to a caregiver using Twilio.
 
